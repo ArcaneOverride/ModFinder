@@ -2,26 +2,64 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows.Markup;
 
 namespace ModFinder.UI
 {
   // Supported columns for custom sorting
-  internal enum SortColumn
+  [TypeConverter(typeof(EnumConverter))] 
+  public enum SortColumn : Int32
   {
+    Enabled = 0,
+    Name,
     Author,
-    Status
+    LastUpdated,
+    Status,
+  }
+
+  [MarkupExtensionReturnType(typeof(int))]
+  public class EnumToIntExtension : MarkupExtension
+  {
+    public EnumToIntExtension() { }
+    public EnumToIntExtension(Enum enumValue) { EnumValue = enumValue; }
+    [ConstructorArgument("enumValue")]
+    public Enum EnumValue { get; set; }
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+      return int.Parse(EnumValue.ToString("d"));
+    }
   }
 
   internal class ModSort : IComparer, IComparer<ModViewModel>
   {
     private readonly SortColumn Column;
     private readonly bool Invert;
+    private ModSort Subsort;
 
-    public ModSort(SortColumn column, bool invert)
+    public ModSort(SortColumn column, bool invert, ModSort subsort = null)
     {
       Column = column;
       Invert = invert;
+      if (subsort != null)
+        Subsort = subsort;
+      RemoveSubsort(column);
+      
+    }
+
+    private void RemoveSubsort(SortColumn column)
+    {
+      if(Subsort != null)
+      {
+        if (Subsort.Column == column)
+        {
+          Subsort = Subsort.Subsort;
+          RemoveSubsort(column);
+        }
+        else
+          Subsort.RemoveSubsort(column);
+      }
     }
 
     public int Compare(object x, object y)
@@ -36,23 +74,39 @@ namespace ModFinder.UI
 
     public int Compare(ModViewModel x, ModViewModel y)
     {
-      return Column switch
+      return Invert ? CompareInternal(y, x) : CompareInternal(x, y);
+    }
+    private int CompareInternal(ModViewModel x, ModViewModel y)
+    {
+      int result = Column switch
       {
-        SortColumn.Author => Invert ? CompareAuthor(y, x) : CompareAuthor(x, y),
-        SortColumn.Status => Invert ? CompareStatus(y, x) : CompareStatus(x, y),
+        SortColumn.Enabled => x.Enabled.CompareTo(y.Enabled),
+        SortColumn.Status => CompareStatus(x, y),
+        SortColumn.Name => CompareStrings(x.Name, y.Name),
+        SortColumn.Author => CompareStrings(x.Author, y.Author),
+        SortColumn.LastUpdated => CompareStrings(x.LastUpdated, y.LastUpdated),
         _ => throw new ArgumentException($"Unsupported column for sorting: {Column}"),
       };
+
+      if (result == 0)
+        return CompareSubsort(x, y);
+      return result;
     }
 
-    private int CompareAuthor(ModViewModel x, ModViewModel y)
+    private int CompareSubsort(ModViewModel x, ModViewModel y)
     {
-      if (x.Author == y.Author)
-        return Invert ? CompareStatus(y, x) : CompareStatus(x, y); // Don't invert the secondary sorting
-      if (string.IsNullOrEmpty(x.Author))
+      return Subsort != null ? Subsort.Compare(x,y) : 0;
+    }
+
+    private int CompareStrings(string x, string y)
+    {
+      if (x == y)
+        return 0;
+      if (string.IsNullOrEmpty(x))
         return 1;
-      if (string.IsNullOrEmpty(y.Author))
+      if (string.IsNullOrEmpty(y))
         return -1;
-      return x.Author.CompareTo(y.Author);
+      return x.CompareTo(y);
     }
 
     private int CompareStatus(ModViewModel x, ModViewModel y)
@@ -60,7 +114,7 @@ namespace ModFinder.UI
       var statusX = GetStatus(x);
       var statusY = GetStatus(y);
       if (statusX == statusY)
-        return Invert ? y.Name.CompareTo(x.Name) : x.Name.CompareTo(y.Name); // Don't invert the secondary sorting
+        return 0;
       return statusX - statusY;
     }
 

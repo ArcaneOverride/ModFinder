@@ -19,6 +19,7 @@ namespace ModFinder.UI
   /// </summary>
   public class ModViewModel : DependencyObject, INotifyPropertyChanged
   {
+
     private static readonly Regex stripHtml = new(@"<.*?>");
 
     private readonly ModStatus Status = new();
@@ -267,14 +268,14 @@ namespace ModFinder.UI
     {
       if (Manifest.LastChecked == default)
         return "-";
-      return Manifest.LastChecked.ToString("MMM dd yyyy");
+      return Manifest.LastChecked.ToString("yyyy-MM-dd");
     }
 
     public string GetLastUpdated()
     {
       if (Manifest.Version.LastUpdated == default)
         return "-";
-      return Manifest.Version.LastUpdated.ToString("MMM dd yyyy");
+      return Manifest.Version.LastUpdated.ToString("yyyy-MM-dd");
     }
 
     private string GetStatusText()

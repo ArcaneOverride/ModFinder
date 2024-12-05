@@ -24,6 +24,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Data;
 using System.Collections;
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
 namespace ModFinder
 {
@@ -768,27 +769,25 @@ namespace ModFinder
     private static readonly Dictionary<SortColumn, bool> InvertSort =
       new()
       {
+        { SortColumn.Enabled, false },
+        { SortColumn.Name, false },
         { SortColumn.Author, false },
+        { SortColumn.LastUpdated, false },
         { SortColumn.Status, true }, // On init status is the default sort so the next click should invert
       };
+
+    private static ModSort LastSort;
+
     private void OnSort(object sender, DataGridSortingEventArgs e)
     {
       var dataGrid = sender as DataGrid;
       var collectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(dataGrid.ItemsSource);
-      switch (e.Column.DisplayIndex)
+      if (Enum.IsDefined<SortColumn>((SortColumn)e.Column.DisplayIndex))
       {
-        case -1: // Fake for goto
-          e.Handled = true;
-          break;
-        case 2: // Author
-          collectionView.CustomSort = new ModSort(SortColumn.Author, InvertSort[SortColumn.Author]);
-          InvertSort[SortColumn.Author] = !InvertSort[SortColumn.Author];
-          goto case -1;
-        case 3: // Status
-          collectionView.CustomSort = new ModSort(SortColumn.Status, InvertSort[SortColumn.Status]);
-          InvertSort[SortColumn.Status] = !InvertSort[SortColumn.Status];
-          goto case -1;
-      }
+        SortColumn column = (SortColumn)e.Column.DisplayIndex;
+        collectionView.CustomSort = LastSort = new ModSort(column, InvertSort[column], LastSort);
+        InvertSort[column] = !InvertSort[column];
+      } 
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)

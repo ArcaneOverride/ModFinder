@@ -602,35 +602,42 @@
             <DataGrid.Background>Transparent</DataGrid.Background>
 
             <DataGrid.Columns>
-              <DataGridTemplateColumn Header="  Enabled" Width="105" CanUserResize="False">
+              <DataGridTemplateColumn Header="  Enabled" Width="105" CanUserResize="False" DisplayIndex="{local:EnumToInt EnumValue={x:Static local:SortColumn.Enabled}}">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                         <local:SlideToggle LeftText="{Binding EnabledText}" IsEnabled="{Binding IsInstalled}" IsChecked="{Binding Enabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></local:SlideToggle>
                   </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
               </DataGridTemplateColumn>
-              <DataGridTextColumn Header="Name" Width="280" Binding="{Binding Name, Mode=OneWay}">
+              <DataGridTextColumn Header="Name" Width="280" Binding="{Binding Name, Mode=OneWay}" DisplayIndex="{local:EnumToInt EnumValue={x:Static local:SortColumn.Name}}">
                 <DataGridTextColumn.ElementStyle>
                   <Style TargetType="TextBlock">
                     <Setter Property="Padding" Value="0,0,15,0"/>
                   </Style>
                 </DataGridTextColumn.ElementStyle>
               </DataGridTextColumn>
-              <DataGridTextColumn Header="Author" Width="230" Binding="{Binding Author, Mode=OneWay}">
+              <DataGridTextColumn Header="Author" Width="230" Binding="{Binding Author, Mode=OneWay}" DisplayIndex="{local:EnumToInt EnumValue={x:Static local:SortColumn.Author}}">
                 <DataGridTextColumn.ElementStyle>
                   <Style TargetType="TextBlock">
                     <Setter Property="Margin" Value="0,0,15,0"/>
                   </Style>
                 </DataGridTextColumn.ElementStyle>
               </DataGridTextColumn>
-              <DataGridTextColumn Header="Status" Width="*" Binding="{Binding StatusText, Mode=OneWay}">
+              <DataGridTextColumn Header="Updated" Width="auto" Binding="{Binding LastUpdated, Mode=OneWay}" DisplayIndex="{local:EnumToInt EnumValue={x:Static local:SortColumn.LastUpdated}}">
                 <DataGridTextColumn.ElementStyle>
                   <Style TargetType="TextBlock">
                     <Setter Property="Margin" Value="0,0,15,0"/>
                   </Style>
                 </DataGridTextColumn.ElementStyle>
               </DataGridTextColumn>
-              <DataGridTemplateColumn Width="35" CanUserResize="False">
+              <DataGridTextColumn Header="Status" Width="*" Binding="{Binding StatusText, Mode=OneWay}" DisplayIndex="{local:EnumToInt EnumValue={x:Static local:SortColumn.Status}}">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Margin" Value="0,0,15,0"/>
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+              <DataGridTemplateColumn Width="35" CanUserResize="False" CanUserSort="False">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                     <Image HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0">
@@ -654,7 +661,7 @@
                   </DataTemplate>
                 </DataGridTemplateColumn.CellTemplate>
               </DataGridTemplateColumn>
-              <DataGridTemplateColumn Width="230" CanUserResize="False">
+              <DataGridTemplateColumn Width="230" CanUserResize="False" CanUserSort="False">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                     <Grid>

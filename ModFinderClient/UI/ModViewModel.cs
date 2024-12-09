@@ -223,6 +223,11 @@ namespace ModFinder.UI
       return Name is not null && Name.Contains(name, System.StringComparison.CurrentCultureIgnoreCase);
     }
 
+    public bool MatchesDescription(string description)
+    {
+      return DescriptionAsText is not null && DescriptionAsText.Contains(description, System.StringComparison.CurrentCultureIgnoreCase);
+    }
+
     public bool HasTag(Tag tag)
     {
       return Manifest.Tags.Contains(tag);

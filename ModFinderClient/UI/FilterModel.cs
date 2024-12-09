@@ -16,6 +16,9 @@ namespace ModFinder.UI
     private readonly List<string> IncludeNames = new();
     private readonly List<string> ExcludeNames = new();
 
+    private readonly List<string> IncludeDescriptions = new();
+    private readonly List<string> ExcludeDescriptions = new();
+
     private readonly List<Tag> IncludeTags = new();
     private readonly List<Tag> ExcludeTags = new();
 
@@ -58,6 +61,12 @@ namespace ModFinder.UI
           return false;
       }
 
+      foreach (var description in ExcludeDescriptions)
+      {
+        if (viewModel.MatchesDescription(description))
+          return false;
+      }
+
       foreach (var tag in ExcludeTags)
       {
         if (viewModel.HasTag(tag))
@@ -76,6 +85,12 @@ namespace ModFinder.UI
           return true;
       }
 
+      foreach (var description in IncludeDescriptions)
+      {
+        if (viewModel.MatchesDescription(description))
+          return true;
+      }
+
       foreach (var tag in IncludeTags)
       {
         if (viewModel.HasTag(tag))
@@ -85,14 +100,14 @@ namespace ModFinder.UI
       // Need to match all raw searches
       foreach (var raw in RawFilters)
       {
-        if (!viewModel.MatchesAuthor(raw) && !viewModel.MatchesName(raw))
+        if (!viewModel.MatchesAuthor(raw) && !viewModel.MatchesName(raw) && !viewModel.MatchesDescription(raw))
           return false;
       }
 
       // If there are any include filters then nothing up until now has matched, this should not be included. Otherwise
       // there are no filters (or only exclude filters) so it matches.
       if (!RawFilters.Any()
-        && (IncludeAuthors.Any() || IncludeNames.Any() || IncludeTags.Any()))
+        && (IncludeAuthors.Any() || IncludeNames.Any() || IncludeDescriptions.Any() || IncludeTags.Any()))
       {
         return false;
       }
@@ -115,6 +130,9 @@ namespace ModFinder.UI
             break;
           case "n":
             AddName(filterStr, include);
+            break;
+          case "d":
+            AddDescription(filterStr, include);
             break;
           case "t":
             AddTag(filterStr, include);
@@ -149,6 +167,13 @@ namespace ModFinder.UI
         IncludeNames.Add(name);
       else
         ExcludeNames.Add(name);
+    }
+    private void AddDescription(string description, bool include = true)
+    {
+      if (include)
+        IncludeDescriptions.Add(description);
+      else
+        ExcludeDescriptions.Add(description);
     }
 
     private static readonly Dictionary<string, Tag> AllTags =
@@ -191,6 +216,9 @@ namespace ModFinder.UI
 
       IncludeNames.Clear();
       ExcludeNames.Clear();
+
+      IncludeDescriptions.Clear();
+      ExcludeDescriptions.Clear();
 
       IncludeTags.Clear();
       ExcludeTags.Clear();
